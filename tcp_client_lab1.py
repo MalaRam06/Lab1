@@ -1,6 +1,6 @@
 import socket
 
-client_name = input("Client of : ")
+client_name = input("Client's name: ")
 client_number = int(input("Enter a number between 1 and 100: "))
 
 if not (1 <= client_number <= 100):

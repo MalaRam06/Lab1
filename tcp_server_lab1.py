@@ -1,7 +1,7 @@
 import socket
 import random
 
-server_name = "Server of Your Name"
+server_name = input("Server's name : ")
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind(('localhost', 5001))
 server_socket.listen(1)
