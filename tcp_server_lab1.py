@@ -1,48 +1,38 @@
 import socket
-import json
+import random
 
-HOST = "10.38.11.28"
-PORT = 6000   # must be > 5000 (as per assignment)
-
+server_name = "Server of Your Name"
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((HOST, PORT))
-server_socket.listen()
+server_socket.bind(('localhost', 5001))
+server_socket.listen(1)
+print("Server is listening on port 5001...")
 
-print(f"Server is listening on port {PORT}")
 conn, addr = server_socket.accept()
-print(f"Connected by {addr}")
+print("Connected by", addr)
 
-server_name = "Server of John Q. Smith"   # change to your name
-server_number = 42                        # fixed or random between 1–100
+data = conn.recv(1024).decode()
+client_name, client_number = data.split(',')
+client_number = int(client_number)
 
-while True:
-    data = conn.recv(1024).decode()
-    if not data:
-        break
+print("Client's Name:", client_name)
+print("Server's Name:", server_name)
 
-    client_data = json.loads(data)
-    client_name = client_data["name"]
-    client_number = client_data["number"]
+# Check if the client's number is outside the allowed range
+if not (1 <= client_number <= 100):
+    print("Received number out of range! Closing connection.")
+    conn.close()
+    server_socket.close()
+    exit()  # Terminate the program
 
-    # stop if number out of range
-    if not (1 <= client_number <= 100):
-        print("Invalid number received. Closing connection.")
-        break
+# If the number is valid, proceed
+server_number = random.randint(1, 100)
+print("Client's Number:", client_number)
+print("Server's Number:", server_number)
+print("Sum:", client_number + server_number)
 
-    # display
-    print("\n--- Exchange ---")
-    print(f"Client Name   : {client_name}")
-    print(f"Server Name   : {server_name}")
-    print(f"Client Number : {client_number}")
-    print(f"Server Number : {server_number}")
-    print(f"Sum           : {client_number + server_number}")
+response = f"{server_name},{server_number}"
+conn.send(response.encode())
 
-    # prepare reply
-    reply = {
-        "name": server_name,
-        "number": server_number
-    }
-    conn.send(json.dumps(reply).encode())
-
+# Close the connection after replying
 conn.close()
 server_socket.close()

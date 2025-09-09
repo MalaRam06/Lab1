@@ -1,46 +1,26 @@
 import socket
-import json
 
-HOST = "10.38.11.28"
-PORT = 6000   # same as server
+client_name = input("Client of : ")
+client_number = int(input("Enter a number between 1 and 100: "))
+
+if not (1 <= client_number <= 100):
+    print("Number out of range!")
+    exit()
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((HOST, PORT))
+client_socket.connect(('localhost', 5001))
 
-print(f"Connected to server on port {PORT}")
+message = f"{client_name},{client_number}"
+client_socket.send(message.encode())
 
-client_name = "Client of John Q. Smith"   # change to your name
+data = client_socket.recv(1024).decode()
+server_name, server_number = data.split(',')
+server_number = int(server_number)
 
-while True:
-    try:
-        num = int(input("Enter an integer (1–100): "))
-    except ValueError:
-        print("Invalid input, try again.")
-        continue
-
-    data = {
-        "name": client_name,
-        "number": num
-    }
-    client_socket.send(json.dumps(data).encode())
-
-    if not (1 <= num <= 100):
-        print("Number out of range. Closing connection.")
-        break
-
-    reply = client_socket.recv(1024).decode()
-    reply_data = json.loads(reply)
-
-    server_name = reply_data["name"]
-    server_number = reply_data["number"]
-
-    # display
-    print("\n--- Exchange ---")
-    print(f"Client Name   : {client_name}")
-    print(f"Server Name   : {server_name}")
-    print(f"Client Number : {num}")
-    print(f"Server Number : {server_number}")
-    print(f"Sum           : {num + server_number}")
+print("Client's Name:", client_name)
+print("Server's Name:", server_name)
+print("Client's Number:", client_number)
+print("Server's Number:", server_number)
+print("Sum:", client_number + server_number)
 
 client_socket.close()
-
